@@ -23,7 +23,8 @@ private:
     }
 
 public:
-    UnionFind(const std::initializer_list<T> &l) {
+    template<typename Container>
+    UnionFind(const Container &l) {
         std::vector<T> uniques(begin(l), end(l));
         uniques.erase(std::unique(begin(uniques), end(uniques)), end(uniques));
         to_elem.reserve(size(uniques));
@@ -34,6 +35,8 @@ public:
             to_elem.emplace(uniques[i], i);
         }
     }
+
+    UnionFind(const std::initializer_list<T>& l) : UnionFind(l) {}
 
     bool disjoint(const T &a, const T &b)  {
         return find_root(a) != find_root(b);

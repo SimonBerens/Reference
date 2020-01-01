@@ -1,7 +1,7 @@
 #include <iostream>
 #include <array>
 #include <cmath>
-// #include <bit> todo: coming in C++ 20
+// todo c++20 #include <bit>
 
 using namespace std;
 
@@ -58,7 +58,7 @@ uint count_bits_lookup_table(ulong x) {
 }
 
 uint count_bits_library(uint x) { // note: __builtin_popcount takes an unsigned integer
-    return __builtin_popcount(x); // GCC specific, todo std::popcount coming in C++20
+    return __builtin_popcount(x); // GCC specific, todo c++20 std::popcount
 }
 
 int main() {}

@@ -1,4 +1,8 @@
+from functools import lru_cache
+
+
 def naive(width, height):
+    @lru_cache
     def go(r, c, dr, dc):
         if 0 <= r < height and 0 <= c < width:
             return 1 + go(r + dr, c + dc, dr, dc)
@@ -9,16 +13,17 @@ def naive(width, height):
         for col in range(width):
             for dr in (-1, 0, 1):
                 for dc in (-1, 0, 1):
-                    res += go(row, col, row + dr, col + dc)
+                    if dr or dc:
+                        res += go(row + dr, col + dc, dr, dc)
     return res
 
 
 def optimized(width, height):
     res = 0
-    for row in range(width):
-        for col in range(height):
+    for row in range(height):
+        for col in range(width):
             res += width - 1 + height - 1
-            res += min(col - row + height - 1, height - 1) - max(0, col - row)
+            res += min(col - row + height - 1, width - 1) - max(0, col - row)
             res += min(row + col + 1, width) - max(row + col - height + 2, 1)
     return res
 

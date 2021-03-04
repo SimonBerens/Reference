@@ -1,3 +1,7 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+
 #ifndef REFERENCE_UNION_FIND_H
 #define REFERENCE_UNION_FIND_H
 
@@ -66,3 +70,25 @@ private:
 };
 
 #endif //REFERENCE_UNION_FIND_H
+
+
+int main() {
+    int t;
+    cin >> t;
+    for (int i = 0; i < t; ++i) {
+        UnionFind<string> friends;
+        int f;
+        cin >> f >> ws;
+        for (int j = 0; j < f; ++j) {
+            string line, a, b;
+            getline(cin, line);
+            int pos = line.find(' ');
+            a = line.substr(0, pos);
+            b = line.substr(pos + 1, line.size());
+            friends.add(a);
+            friends.add(b);
+            friends.unify(a, b);
+            cout << friends.group_size(a) << "\n";
+        }
+    }
+}

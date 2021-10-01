@@ -37,26 +37,35 @@ using minq = priority_queue<T, vector<T>, greater<T>>;
 template <typename T>
 using maxq = priority_queue<T>;
 
+
 int main() {
-    int N;
-    cin >> N;
-    vvi g(N, vi(N)), gt(N, vi(N));
-    for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
-            cin >> g[i][j];
-            gt[j][i] = g[i][j];
+    int n;
+    cin >> n;
+    string s;
+    cin >> s;
+    vi a(n + 1);
+    for (int i = 0; i < n + 1; ++i) {
+        cin >> a[i];
+    }
+
+    int k = 100000000;
+    for (int i = 0; i < n; ++i) {
+        k = min(k, abs(a[i] - a[i + 1]));
+    }
+
+    vvi res(k);
+    for (int i = 0; i < n + 1; ++i) {
+        for (int j = 0; j < k; ++j) {
+            res[j].push_back((a[i] + j) / k);
         }
     }
-    ll res = 0;
-    for (auto &grid : {g, gt}) {
-        ll temp_res = 0;
-        for (int i = 0; i < N; ++i) {
-            vi b1, b2;
-            bool toggle = false;
-            partition_copy(grid[i].begin(), grid[i].end(), back_inserter(b1), back_inserter(b2), [&toggle](int) { return toggle = !toggle; });
-            temp_res += max(accumulate(b1.begin(), b1.end(), 0L), accumulate(b2.begin(), b2.end(), 0L));
+
+    cout << k << '\n';
+    for (int i = 0; i < k; ++i) {
+        for (int j = 0; j < n + 1; ++j) {
+            cout << res[i][j] << ' ';
         }
-        res = max(res, temp_res);
+        cout << '\n';
     }
-    cout << res << "\n";
+
 }

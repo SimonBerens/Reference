@@ -40,23 +40,21 @@ using maxq = priority_queue<T>;
 int main() {
     int N;
     cin >> N;
-    vvi g(N, vi(N)), gt(N, vi(N));
+    vector<pair<int, int>> v(N);
     for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
-            cin >> g[i][j];
-            gt[j][i] = g[i][j];
+        int a, b;
+        cin >> a >> b;
+        v[i] = {a, b};
+    }
+    auto [a, b] = v[0];
+    for (int i = 1; i < N; ++i) {
+        auto[c, d] = v[i];
+        a = max(a, c);
+        b = min(b, d);
+        if (a > b) {
+            cout << "edward is right\n";
+            exit(0);
         }
     }
-    ll res = 0;
-    for (auto &grid : {g, gt}) {
-        ll temp_res = 0;
-        for (int i = 0; i < N; ++i) {
-            vi b1, b2;
-            bool toggle = false;
-            partition_copy(grid[i].begin(), grid[i].end(), back_inserter(b1), back_inserter(b2), [&toggle](int) { return toggle = !toggle; });
-            temp_res += max(accumulate(b1.begin(), b1.end(), 0L), accumulate(b2.begin(), b2.end(), 0L));
-        }
-        res = max(res, temp_res);
-    }
-    cout << res << "\n";
+    cout << "gunilla has a point\n";
 }

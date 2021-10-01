@@ -37,26 +37,28 @@ using minq = priority_queue<T, vector<T>, greater<T>>;
 template <typename T>
 using maxq = priority_queue<T>;
 
+template<typename IN>
+IN discrete_binary_search(function<bool(IN)> predicate, IN low = 0, IN high = numeric_limits<IN>::max()) {
+    while (low < high) {
+        IN middle = low + (high - low) / 2; // todo std::midpoint in cpp 2020
+        if (predicate(middle))
+            high = middle;
+        else low = middle + 1;
+    }
+    return low;
+}
+
+int n;
+string s;
+
 int main() {
-    int N;
-    cin >> N;
-    vvi g(N, vi(N)), gt(N, vi(N));
-    for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
-            cin >> g[i][j];
-            gt[j][i] = g[i][j];
+    cin >> n;
+    cin >> s;
+    cout << discrete_binary_search<int>([](int t) -> bool {
+        int x = s.find('*');
+        int p = s.find('P');
+        if (x < p) {
+            x = p + t - 2 * (p - x)
         }
-    }
-    ll res = 0;
-    for (auto &grid : {g, gt}) {
-        ll temp_res = 0;
-        for (int i = 0; i < N; ++i) {
-            vi b1, b2;
-            bool toggle = false;
-            partition_copy(grid[i].begin(), grid[i].end(), back_inserter(b1), back_inserter(b2), [&toggle](int) { return toggle = !toggle; });
-            temp_res += max(accumulate(b1.begin(), b1.end(), 0L), accumulate(b2.begin(), b2.end(), 0L));
-        }
-        res = max(res, temp_res);
-    }
-    cout << res << "\n";
+    }, 0, 200000);
 }

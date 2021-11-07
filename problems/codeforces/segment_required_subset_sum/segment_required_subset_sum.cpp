@@ -8,6 +8,11 @@ template <typename K, typename V> using hmap = gp_hash_table<K, V>;
 
 using namespace std;
 
+#define all(x) (x).begin(), (x).end()
+#define pb push_back
+#define smax(x, y) (x = max(x, y))
+#define smin(x, y) (x = min(x, y))
+
 using ll = long long;
 
 using vi = vector<int>;
@@ -18,73 +23,63 @@ using minq = priority_queue<T, vector<T>, greater<T>>;
 template <typename T>
 using maxq = priority_queue<T>;
 
-ll M = 1000000007;
-int s;
-vvi s1, s2;
+const ll M = 1000000007;
 
-bool good() {
-    if (s1.empty() && s2.empty()) {
-        return false;
-    }
-    if (s1.empty()) {
-        return s2.back()[s] == 1;
-    }
-    if (s2.empty()) {
-        return s1.back()[s] == 1;
-    }
-    for (int i = 0; i < 1001; ++i) {
-        if (s2.back()[i] == 1 && s1.back()[s-i] == 1) {
-            return true;
+int n, s;
+vi a;
+
+vi lv, rv;
+vector<bitset<1001>> ldp, rdp;
+
+void push(int v) {
+    rv.push_back(v);
+    rdp.push_back(rdp.back() | (rdp.back() << v));
+}
+
+void pop() {
+    if (lv.empty()) {
+        while (!rv.empty()) {
+            lv.push_back(rv.back());
+            rv.pop_back();
+            rdp.pop_back();
+            ldp.push_back(ldp.back() | (ldp.back() >> lv.back()));
         }
     }
-    return false;
+    lv.pop_back();
+    ldp.pop_back();
+}
+
+bool good() {
+    return (ldp.back() & rdp.back()) != 0;
+
 }
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    int n;
+
     cin >> n >> s;
-    vi a(n);
+    a.assign(n, 0);
     for (int i = 0; i < n; ++i) {
         cin >> a[i];
     }
+
+    rdp.emplace_back();
+    rdp.back()[0] = 1;
+    ldp.emplace_back();
+    ldp.back()[s] = 1;
+
     int res = M;
-    int l = 0;
+    int l = -1;
     for (int r = 0; r < n; ++r) {
-        if (s1.empty()) {
-            s1.emplace_back(1001);
-            s1.back()[0] = 1;
-            s1.back()[a[r]] = 1;
-        } else {
-            s1.emplace_back(s1.back());
-            for (int i = 1000 - a[r]; i >= 0; --i) {
-                if (s1.back()[i] == 1) {
-                    s1.back()[i + a[r]] = 1;
-                }
-            }
-        }
-        while (l <= r && good()) {
-            res = min(res, r - l + 1);
-            if (s2.empty()) {
-                s2.emplace_back(1001);
-                s2.back()[0] = 1;
-                s2.back()[a[r]] = 1;
-                for (int i = r - 1; i >= l; --i) {
-                    s2.emplace_back(s2.back());
-                    for (int j = 1000 - a[i]; j >= 0; --j) {
-                        if (s2.back()[j] == 1) {
-                            s2.back()[j + a[i]] = 1;
-                        }
-                    }
-                }
-                s1 = {};
-            }
-            s2.pop_back();
-            ++l;
+        push(a[r]);
+        while (good()) {
+            res = min(res, r - l++);
+            pop();
         }
     }
 
-    cout << (res == M ? -1 : res)<< '\n';
+    cout << (res == M ? -1 : res) << '\n';
+
 
 }

@@ -37,16 +37,8 @@ using maxq = priority_queue<T>;
 
 const ll M = 1000000007;
 
-#pragma GCC optimize ("Ofast")
-#pragma GCC target ("avx2")
 
-// call randint() for a random integer
 mt19937 randint(chrono::steady_clock::now().time_since_epoch().count());
-
-// returns a random integer over [a, b] inclusive
-inline int uniform_randint(const int a, const int b) {
-    return uniform_int_distribution<int>(a, b)(randint);
-}
 
 // returns a vector of length n, containing 1 if a number is prime, else 0.
 // runs in O(nloglogn) time.
@@ -121,32 +113,49 @@ vector<ll> primefactors(ll n) {
     return out;
 }
 
-string s;
-
-std::string repeat(const std::string& input, size_t num)
-{
-    std::ostringstream os;
-    std::fill_n(std::ostream_iterator<std::string>(os), num, input);
-    return os.str();
-}
-
-bool good(int p) {
-    return (s.size() % p == 0) && (s == repeat(s.substr(0, s.size() / p), p));
+// returns a sorted list of all divisors of n in approximately O(min(n^(1/2), n^(1/3)+log^3(n)+10^5)) time.
+// works for n <= 10^18
+vector<ll> divisors(ll n) {
+    map<ll, int> p;
+    for (ll x : primefactors(n))
+        p[x]++;
+    vector<ll> out = {1};
+    for (auto& [q, f] : p) {
+        vector<ll> tmp;
+        for (ll x : out) {
+            ll r = 1;
+            for (int i = 0; i <= f; i++) {
+                tmp.pb(x*r);
+                r *= q;
+            }
+        }
+        out = tmp;
+    }
+    return out;
 }
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    while (true) {
-        cin >> s;
-        int szo = s.size();
-        if (s == ".") break;
-        auto pf = primefactors(s.size());
-        for (int p : pf) {
-            while (good(p)) {
-                s = s.substr(0, s.size() / p);
-            }
-        }
-        cout << szo / s.size() << '\n';
+    int n;
+    cin >> n;
+    vi a(n);
+    for (int i = 0; i < n; ++i) {
+        cin >> a[i];
     }
+    sort(all(a));
+    vi diffs;
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            diffs.pb(a[j] - a[i]);
+        }
+    }
+    int g = diffs[0];
+    for (int diff : diffs) g = gcd(g, diff);
+
+    for (int div : divisors(g)) {
+        if (div != 1)
+            cout << div << ' ';
+    }
+    cout << '\n';
 }

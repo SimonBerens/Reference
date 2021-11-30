@@ -37,16 +37,19 @@ using maxq = priority_queue<T>;
 
 const ll M = 1000000007;
 
-#pragma GCC optimize ("Ofast")
-#pragma GCC target ("avx2")
-
-// call randint() for a random integer
-mt19937 randint(chrono::steady_clock::now().time_since_epoch().count());
-
-// returns a random integer over [a, b] inclusive
-inline int uniform_randint(const int a, const int b) {
-    return uniform_int_distribution<int>(a, b)(randint);
+template <typename T=int, typename C=int>
+vector<pair<T, C>> groupby(const vector<T> & a) {
+    vector<pair<T, C>> groups;
+    for (const T & v : a) {
+        if (groups.empty() || groups.back().first != v) {
+            groups.pb({v, C{}});
+        }
+        ++groups.back().second;
+    }
+    return groups;
 }
+
+mt19937 randint(chrono::steady_clock::now().time_since_epoch().count());
 
 // returns a vector of length n, containing 1 if a number is prime, else 0.
 // runs in O(nloglogn) time.
@@ -121,32 +124,48 @@ vector<ll> primefactors(ll n) {
     return out;
 }
 
-string s;
-
-std::string repeat(const std::string& input, size_t num)
-{
-    std::ostringstream os;
-    std::fill_n(std::ostream_iterator<std::string>(os), num, input);
-    return os.str();
+// returns a sorted list of all divisors of n in approximately O(min(n^(1/2), n^(1/3)+log^3(n)+10^5)) time.
+// works for n <= 10^18
+vector<ll> divisors(ll n) {
+    map<ll, int> p;
+    for (ll x : primefactors(n))
+        p[x]++;
+    vector<ll> out = {1};
+    for (auto& [q, f] : p) {
+        vector<ll> tmp;
+        for (ll x : out) {
+            ll r = 1;
+            for (int i = 0; i <= f; i++) {
+                tmp.pb(x*r);
+                r *= q;
+            }
+        }
+        out = tmp;
+    }
+    return out;
 }
 
-bool good(int p) {
-    return (s.size() % p == 0) && (s == repeat(s.substr(0, s.size() / p), p));
-}
+vi pcnt(1e6 + 1, 0);
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    while (true) {
-        cin >> s;
-        int szo = s.size();
-        if (s == ".") break;
-        auto pf = primefactors(s.size());
-        for (int p : pf) {
-            while (good(p)) {
-                s = s.substr(0, s.size() / p);
-            }
+    int n;
+    cin >> n;
+    vi x(n);
+    for (int i = 0; i < n; ++i) {
+        cin >> x[i];
+    }
+    for (int v : x) {
+        for (auto d : divisors(v)) {
+            pcnt[d]++;
         }
-        cout << szo / s.size() << '\n';
+        pcnt[1]++;
+    }
+    for (int v = pcnt.size() -1 ; v>=1; --v) {
+        if (pcnt[v] >= 2) {
+            cout << v << '\n';
+            break;
+        }
     }
 }

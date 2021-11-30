@@ -1,10 +1,13 @@
 #include <bits/stdc++.h>
 
 #include <ext/pb_ds/assoc_container.hpp>
-using namespace __gnu_pbds;
-template <typename K> using hset = gp_hash_table<K, null_type>;
-template <typename K, typename V> using hmap = gp_hash_table<K, V>;
 
+using namespace __gnu_pbds;
+template<typename K> using hset = gp_hash_table<K, null_type>;
+template<typename K, typename V> using hmap = gp_hash_table<K, V>;
+
+#pragma GCC optimize ("Ofast")
+#pragma GCC target ("avx2")
 
 using namespace std;
 
@@ -17,7 +20,7 @@ using namespace std;
 using ll = long long;
 using ld = long double;
 
-template <typename T>
+template<typename T>
 using vv = vector<vector<T>>;
 
 using vi = vector<int>;
@@ -30,23 +33,25 @@ using l2 = array<ll, 2>;
 using vl2 = vector<l2>;
 using vvll = vv<ll>;
 
-template <typename T>
+template<typename T>
 using minq = priority_queue<T, vector<T>, greater<T>>;
-template <typename T>
+template<typename T>
 using maxq = priority_queue<T>;
 
 const ll M = 1000000007;
 
-#pragma GCC optimize ("Ofast")
-#pragma GCC target ("avx2")
-
-// call randint() for a random integer
-mt19937 randint(chrono::steady_clock::now().time_since_epoch().count());
-
-// returns a random integer over [a, b] inclusive
-inline int uniform_randint(const int a, const int b) {
-    return uniform_int_distribution<int>(a, b)(randint);
+template<typename T, typename C>
+vector<pair<T, C>> groupby(const vector<T> &a) {
+    vector<pair<T, C>> groups;
+    for (const T &v: a) {
+        if (groups.empty() || groups.back().first != v) {
+            groups.pb({v, C{}});
+        }
+        ++groups.back().second;
+    }
+    return groups;
 }
+mt19937 randint(chrono::steady_clock::now().time_since_epoch().count());
 
 // returns a vector of length n, containing 1 if a number is prime, else 0.
 // runs in O(nloglogn) time.
@@ -121,32 +126,52 @@ vector<ll> primefactors(ll n) {
     return out;
 }
 
-string s;
-
-std::string repeat(const std::string& input, size_t num)
-{
-    std::ostringstream os;
-    std::fill_n(std::ostream_iterator<std::string>(os), num, input);
-    return os.str();
+// returns a sorted list of all divisors of n in approximately O(min(n^(1/2), n^(1/3)+log^3(n)+10^5)) time.
+// works for n <= 10^18
+vector<ll> divisors(ll n) {
+    map<ll, int> p;
+    for (ll x : primefactors(n))
+        p[x]++;
+    vector<ll> out = {1};
+    for (auto& [q, f] : p) {
+        vector<ll> tmp;
+        for (ll x : out) {
+            ll r = 1;
+            for (int i = 0; i <= f; i++) {
+                tmp.pb(x*r);
+                r *= q;
+            }
+        }
+        out = tmp;
+    }
+    return out;
 }
 
-bool good(int p) {
-    return (s.size() % p == 0) && (s == repeat(s.substr(0, s.size() / p), p));
-}
+const ll mk = 2e7 + 5;
+vll primes = primesupto(mk), mpd(mk), npd(mk);
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    while (true) {
-        cin >> s;
-        int szo = s.size();
-        if (s == ".") break;
-        auto pf = primefactors(s.size());
-        for (int p : pf) {
-            while (good(p)) {
-                s = s.substr(0, s.size() / p);
-            }
+    for (ll p : primes) {
+        for (ll pmult = p; pmult < mk; pmult += p) {
+            if (mpd[pmult] == 0) mpd[pmult] = p;
         }
-        cout << szo / s.size() << '\n';
+    }
+    for (int i = 2; i < mk; ++i) {
+        npd[i] = npd[i / mpd[i]] + (mpd[i / mpd[i]] != mpd[i]);
+    }
+    int t;
+    cin >> t;
+    for (int test_no = 0; test_no < t; ++test_no) {
+        ll c, d, x;
+        cin >> c >> d >> x;
+        ll res{};
+        for (ll div : divisors(x)) {
+            ll rhs = x / div  + d;
+            if (rhs % c != 0) continue;
+            res += 1 << npd[rhs / c];
+        }
+        cout << res << '\n';
     }
 }
